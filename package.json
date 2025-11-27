@@ -1,13 +1,9 @@
 {
-    "name": "@pecasha/china-railway-station",
+    "name": "@pomerun/china-railway-station",
     "version": "1.0.1",
     "type": "module",
     "description": "中国铁路车站信息",
-    "author": {
-        "name": "Pecasha",
-        "email": "chihai@pecasha.com",
-        "url": "https://pecasha.com"
-    },
+    "author": "Pomerun",
     "sideEffects": false,
     "license": "GPL-3.0-or-later",
     "main": "./build/index.cjs",
@@ -22,7 +18,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/pecasha/china-railway-station.git"
+        "url": "git+https://github.com/pomerun/china-railway-station.git"
     },
     "files": [
         "build"

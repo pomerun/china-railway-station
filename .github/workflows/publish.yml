@@ -36,7 +36,7 @@ jobs:
                   NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
             - name: Publish NPM
               run: |
-                  sed -i 's/"name": "@pecasha\/china-railway-station"/"name": "china-railway-station"/' package.json
+                  sed -i 's/"name": "@pomerun\/china-railway-station"/"name": "china-railway-station"/' package.json
                   npm pack
                   TARBALL=$(ls *.tgz)
                   npm publ $TARBALL --registry=https://registry.npmjs.org
