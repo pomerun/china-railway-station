@@ -68,9 +68,12 @@ jobs:
               run: pnpm install
             - name: Build
               run: npm run build
-            - name: Publish
+            - name: Publish GitHub
+              run: npm publ --registry=https://npm.pkg.github.com
+              env:
+                  NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+            - name: Publish NPM
               run: |
-                  npm publ --registry=https://npm.pkg.github.com
                   sed -i 's/"name": "@pecasha\/china-railway-station"/"name": "china-railway-station"/' package.json
                   npm pack
                   TARBALL=$(ls *.tgz)
@@ -79,4 +82,3 @@ jobs:
                   rm $TARBALL
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-                  NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
