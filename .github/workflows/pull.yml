@@ -1,5 +1,6 @@
 name: Pull Data and Publish
 permissions:
+    id-token: write
     contents: write
 on:
     workflow_dispatch:
@@ -82,5 +83,3 @@ jobs:
                   npm publ $TARBALL --registry=https://registry.npmjs.org
                   git checkout package.json
                   rm $TARBALL
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
