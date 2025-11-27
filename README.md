@@ -1,4 +1,9 @@
 # China Railway Station
+
+[![npm version](https://img.shields.io/npm/v/china-railway-station?logo=npm)](https://www.npmjs.com/package/china-railway-station)
+[![npm version](https://img.shields.io/github/package-json/v/pomerun/china-railway-station?logo=github)](https://github.com/pomerun/china-railway-station/pkgs/npm/china-railway-station)
+[![MIT Licence](https://img.shields.io/github/license/pomerun/china-railway-station)](https://github.com/pomerun/china-railway-station/blob/master/LICENSE)
+
 > 中国铁路车站信息
 
 ## 支持环境
@@ -86,5 +91,3 @@ getList();
 | city | `string` | 否 | - | 城市名/城市编码 |
 
 - 返回值：`Station[]`
-## 说明
-- 数据来源：<https://kyfw.12306.cn/otn/resources/js/framework/station_name.js>
