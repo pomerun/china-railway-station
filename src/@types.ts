@@ -22,5 +22,4 @@ export interface Station {
     country?: string;
     /** 所属国家英文名 */
     countryEng?: string;
-
 }
