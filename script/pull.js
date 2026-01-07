@@ -7,6 +7,7 @@ const data = await fetch("https://cdn.pome.run/station_name.js");
 let dataStr = (await data.text()).match(/'([^']*)'/)[1];
 dataStr = dataStr.slice(1);
 dataStr = dataStr.replaceAll("|||", "");
+dataStr = dataStr.replaceAll("xianggangxijiulong#hongkong", "");
 
 await fs.writeFile(
     path.join(path.dirname(fileURLToPath(import.meta.url)), "../src/data.ts"),

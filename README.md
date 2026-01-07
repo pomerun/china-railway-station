@@ -16,7 +16,10 @@
 ```html
 <script src="build/index.iife.js"></script>
 <script>
-    ChinaRailwayStation.getList();
+    const station = new ChinaRailwayStation();
+
+    station.list; // 全部车站列表
+    station.find("北京西"); // 获取 北京西 相关车站
 </script>
 ```
 ### ES Module
@@ -26,8 +29,12 @@ npm i china-railway-station
 ```
 引用依赖：
 ```javascript
-import { getList } from "china-railway-station";
-getList();
+import ChinaRailwayStation from "china-railway-station";
+
+const station = new ChinaRailwayStation();
+
+station.list; // 全部车站列表
+station.find("北京西"); // 获取 北京西 相关车站
 ```
 ### CommonJS
 安装依赖：
@@ -36,18 +43,23 @@ npm i china-railway-station
 ```
 引用依赖：
 ```javascript
-const { getList } = require("china-railway-station");
-getList();
+const ChinaRailwayStation = require("china-railway-station");
+
+const station = new ChinaRailwayStation();
+
+station.list; // 全部车站列表
+station.find("北京西"); // 获取 北京西 相关车站
 ```
-## 调用方法
-#### getList
+## 属性、方法
+#### list
 获取车站全部列表
-- 返回值：`Station[]`
-#### getListCityGroup
+- 类型：`Station[]`
+#### group
 获取车站全部列表（城市分组格式）
-- 返回值：`Record<string, Station[]>`
-#### getStation
+- 类型：`Record<string, Station[]>`
+#### find
 模糊搜索车站
+- 类型：`function`
 - 参数：
 
 | 参数名 | 类型 | 是否可选 | 默认值 | 说明 |
@@ -55,8 +67,9 @@ getList();
 | keyword | `string` | 否 | - | 搜索关键词 |
 
 - 返回值：`Station[]`
-#### getStationByName
+#### findByName
 通过车站名获取车站信息
+- 类型：`function`
 - 参数：
 
 | 参数名 | 类型 | 是否可选 | 默认值 | 说明 |
@@ -64,8 +77,9 @@ getList();
 | name | `string` | 否 | - | 车站名 |
 
 - 返回值：`Station | undefined`
-#### getStationByTelecode
+#### findByTelecode
 通过电报码获取车站信息
+- 类型：`function`
 - 参数：
 
 | 参数名 | 类型 | 是否可选 | 默认值 | 说明 |
@@ -73,8 +87,9 @@ getList();
 | telecode | `string` | 否 | - | 电报码 |
 
 - 返回值：`Station | undefined`
-#### getStationByPinyinCode
+#### findByPinyinCode
 通过拼音码获取车站信息
+- 类型：`function`
 - 参数：
 
 | 参数名 | 类型 | 是否可选 | 默认值 | 说明 |
@@ -82,8 +97,9 @@ getList();
 | pinyinCode | `string` | 否 | - | 拼音码 |
 
 - 返回值：`Station[]`
-#### getStationByCity
+#### findByCity
 通过城市名或城市编码获取车站信息
+- 类型：`function`
 - 参数：
 
 | 参数名 | 类型 | 是否可选 | 默认值 | 说明 |
