@@ -23,6 +23,8 @@ jobs:
               with:
                   node-version: "22"
             - name: Pull Update Data
+              env:
+                  CDN_AUTH_KEY: ${{secrets.CDN_AUTH_KEY}}
               run: npm run pull
             - name: Check Changed
               id: check_diff
