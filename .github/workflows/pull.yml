@@ -2,6 +2,7 @@ name: Pull Data and Publish
 permissions:
     id-token: write
     contents: write
+    pages: write
 on:
     workflow_dispatch:
     schedule:
@@ -73,3 +74,28 @@ jobs:
                   npm publ $TARBALL --registry=https://registry.npmjs.org
                   git checkout package.json
                   rm $TARBALL
+    deploy:
+        needs: publish
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.ref_name }}
+            - name: Build Site
+              run: |
+                  mkdir -p _site/build
+                  cp build/index.iife.js _site/build/index.iife.js
+                  sed 's#\.\./build/index\.iife\.js#build/index.iife.js#' docs/index.html > _site/index.html
+            - name: Setup Pages
+              uses: actions/configure-pages@v5
+            - name: Upload Pages Artifact
+              uses: actions/upload-pages-artifact@v4
+              with:
+                  path: _site
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
