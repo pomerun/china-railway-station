@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>China Railway Station · 中国铁路车站信息</title>
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --primary-light: #dbeafe;
+        --accent: #e11d48;
+        --bg: #f1f5f9;
+        --card: #ffffff;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --code-bg: #0f172a;
+        --code-text: #e2e8f0;
+        --radius: 14px;
+        --shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px rgba(15, 23, 42, .06);
+        --shadow-hover: 0 4px 12px rgba(37, 99, 235, .12), 0 12px 32px rgba(15, 23, 42, .1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    code, pre, .mono { font-family: "SFMono-Regular", "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+        position: relative;
+        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #3b82f6 100%);
+        color: #fff;
+        padding: 56px 24px 88px;
+        overflow: hidden;
+    }
+    .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+        background-size: 32px 32px;
+        mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 40%, transparent 100%);
+        pointer-events: none;
+    }
+    .hero-inner { max-width: 1080px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+    .hero-brand svg { width: 44px; height: 44px; flex: none; }
+    .hero h1 { font-size: 38px; font-weight: 800; letter-spacing: -.02em; }
+    .hero .sub { font-size: 17px; color: #dbeafe; margin-top: 10px; max-width: 640px; }
+    .hero .pkg { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 13px; background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .2); padding: 6px 14px; border-radius: 999px; backdrop-filter: blur(4px); }
+    .hero .pkg b { font-weight: 700; }
+
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1080px; margin: -56px auto 0; padding: 0 24px; position: relative; z-index: 2; }
+    .stat { background: var(--card); border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .stat .num { font-size: 32px; font-weight: 800; color: var(--primary); line-height: 1.1; }
+    .stat .label { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .stat .label code { background: var(--primary-light); color: var(--primary-dark); padding: 1px 6px; border-radius: 5px; font-size: 12px; }
+
+    /* ---------- Layout ---------- */
+    main { max-width: 1080px; margin: 0 auto; padding: 48px 24px 64px; }
+    .section-head { margin: 40px 0 18px; }
+    .section-head:first-child { margin-top: 8px; }
+    .section-head h2 { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .section-head h2::before { content: ""; width: 5px; height: 22px; background: var(--primary); border-radius: 3px; }
+    .section-head p { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 20px; align-items: start; }
+
+    /* ---------- Card ---------- */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; transition: box-shadow .2s, transform .2s; display: flex; flex-direction: column; min-width: 0; }
+    .card.wide { grid-column: 1 / -1; }
+
+    .card-title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+    .card-title .name { font-size: 17px; font-weight: 700; }
+    .badge { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; letter-spacing: .02em; }
+    .badge.method { background: #ecfdf5; color: #047857; }
+    .badge.prop { background: #eff6ff; color: var(--primary-dark); }
+    .badge.ret { background: #f1f5f9; color: var(--muted); font-family: monospace; }
+    .card .desc { color: var(--muted); font-size: 13.5px; margin: 8px 0 14px; }
+
+    .params { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 14px; }
+    .params th, .params td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+    .params th { color: var(--muted); font-weight: 600; background: #f8fafc; }
+    .params td code { color: var(--accent); }
+
+    /* ---------- Controls ---------- */
+    .controls { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .controls input, .controls select { flex: 1; min-width: 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; background: #fff; color: var(--text); transition: border-color .15s, box-shadow .15s; }
+    .controls input:focus, .controls select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+    .controls button { padding: 10px 22px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s, transform .05s; flex: none; }
+    .controls button:hover { background: var(--primary-dark); }
+    .controls button:active { transform: scale(.97); }
+
+    /* ---------- Code echo ---------- */
+    .code { background: var(--code-bg); color: var(--code-text); border-radius: 10px; padding: 12px 14px; font-size: 13px; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; white-space: pre; min-width: 0; }
+    .code .tok-obj { color: #93c5fd; }
+    .code .tok-fn { color: #fcd34d; }
+    .code .tok-str { color: #86efac; }
+    .code .tok-punc { color: #94a3b8; }
+    .code .tok-cmt { color: #64748b; }
+
+    /* ---------- Result ---------- */
+    .result { min-width: 0; }
+    .result-meta { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+    .result-meta b { color: var(--primary); font-weight: 700; }
+    .table-wrap { min-width: 0; overflow: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; max-height: 420px; }
+    table.data { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 12.5px; white-space: nowrap; }
+    table.data th, table.data td { padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    table.data thead th { position: sticky; top: 0; background: #f8fafc; color: var(--muted); font-weight: 600; z-index: 2; }
+    table.data tbody tr:nth-child(even) { background: #fafbfc; }
+    table.data tbody tr:hover { background: var(--primary-light); }
+    /* 首列（站名）横向滚动时固定，便于窄屏识别每一行 */
+    table.data th:first-child, table.data td:first-child { position: sticky; left: 0; background: #fff; z-index: 1; }
+    table.data tbody tr:nth-child(even) td:first-child { background: #fafbfc; }
+    table.data tbody tr:hover td:first-child { background: var(--primary-light); }
+    table.data thead th:first-child { z-index: 3; background: #f8fafc; }
+    table.data th:first-child::after, table.data td:first-child::after { content: ""; position: absolute; top: 0; right: -1px; bottom: -1px; width: 1px; background: var(--border); }
+    table.data td.name-cell { font-weight: 600; color: var(--text); }
+    table.data .na { color: #cbd5e1; }
+    .more { font-size: 12px; color: var(--muted); padding: 8px 12px; background: #f8fafc; border-top: 1px solid var(--border); }
+    .empty { padding: 24px; text-align: center; color: var(--muted); font-size: 13.5px; background: #f8fafc; border: 1px dashed var(--border); border-radius: 10px; }
+    .pager { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .pg-btn { padding: 7px 16px; border: 1px solid var(--border); background: #fff; color: var(--primary); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s; }
+    .pg-btn:hover:not(:disabled) { background: var(--primary-light); border-color: var(--primary); }
+    .pg-btn:disabled { color: var(--muted); opacity: .5; cursor: not-allowed; }
+    .pg-info { font-size: 12.5px; color: var(--muted); margin: 0 2px; }
+    .pg-info b { color: var(--primary); font-weight: 700; }
+
+    /* ---------- Detail (single station) ---------- */
+    dl.detail { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    dl.detail > div { background: #fff; padding: 10px 14px; }
+    dl.detail dt { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    dl.detail dt code { background: #f1f5f9; padding: 0 5px; border-radius: 4px; font-size: 10.5px; color: var(--accent); }
+    dl.detail dd { font-size: 15px; font-weight: 600; margin-top: 2px; }
+    dl.detail dd .na { color: #cbd5e1; font-weight: 400; }
+
+    /* ---------- Tags (group cities) ---------- */
+    .err-banner { max-width: 1080px; margin: 24px auto 0; padding: 0 24px; }
+    .err-banner .box { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 12px; padding: 16px 20px; font-size: 14px; }
+    .err-banner code { background: #fee2e2; padding: 1px 6px; border-radius: 4px; }
+
+    @media (max-width: 640px) {
+        .hero { padding: 40px 18px 64px; }
+        .hero-brand { gap: 10px; margin-bottom: 14px; }
+        .hero-brand svg { width: 36px; height: 36px; }
+        .hero h1 { font-size: 26px; }
+        .hero .sub { font-size: 15px; }
+        .stats { grid-template-columns: 1fr; gap: 12px; padding: 0 18px; margin-top: -44px; }
+        .stat { padding: 16px 18px; }
+        .stat .num { font-size: 26px; }
+        .err-banner { padding: 0 18px; }
+        main { padding: 32px 18px 48px; }
+        .grid { grid-template-columns: 1fr; gap: 16px; }
+        .card { padding: 18px; }
+        .card:hover { transform: none; box-shadow: var(--shadow); }
+        .section-head { margin: 28px 0 14px; }
+        .section-head h2 { font-size: 19px; }
+        dl.detail { grid-template-columns: 1fr; }
+        /* iOS 聚焦不缩放：输入控件字号 ≥ 16px */
+        .controls input, .controls select { font-size: 16px; padding: 11px 14px; }
+        .controls button { width: 100%; padding: 12px 22px; }
+        .table-wrap { max-height: 360px; }
+    }
+
+    @media (max-width: 380px) {
+        .hero h1 { font-size: 22px; }
+        .stat .num { font-size: 24px; }
+        .card-title .name { font-size: 15px; }
+        .card { padding: 16px; }
+    }
+</style>
+</head>
+<body>
+
+<header class="hero">
+    <div class="hero-inner">
+        <div class="hero-brand">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="2.5" width="16" height="14" rx="4" fill="#fff" opacity=".95"/>
+                <rect x="6.5" y="5" width="11" height="5" rx="1.5" fill="#2563eb"/>
+                <circle cx="8.5" cy="13" r="1.4" fill="#2563eb"/>
+                <circle cx="15.5" cy="13" r="1.4" fill="#2563eb"/>
+                <path d="M7 17l-2.5 4M17 17l2.5 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".95"/>
+                <path d="M2 22h20" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+            </svg>
+            <div>
+                <h1>China Railway Station</h1>
+            </div>
+        </div>
+        <p class="sub">中国铁路车站信息</p>
+    </div>
+</header>
+
+<div class="stats">
+    <div class="stat"><div class="num" id="stat-stations">—</div><div class="label">车站总数 <code>list.length</code></div></div>
+    <div class="stat"><div class="num" id="stat-cities">—</div><div class="label">覆盖城市 <code>group</code> 分组数</div></div>
+    <div class="stat"><div class="num" id="stat-telecode">—</div><div class="label">电报码索引 · 去重统计</div></div>
+</div>
+
+<div class="err-banner" id="err-banner" hidden>
+    <div class="box">
+        未能加载 <code>../build/index.iife.js</code>。请确认 demo 目录与 build 目录同级，并通过本地服务器（如 <code>npx serve</code>）打开本页面。
+    </div>
+</div>
+
+<main id="app" hidden>
+
+    <div class="section-head">
+        <h2>属性 Properties</h2>
+        <p>实例化后可直接访问的只读属性。</p>
+    </div>
+
+    <div class="grid">
+        <!-- list -->
+        <div class="card wide">
+            <div class="card-title">
+                <span class="name">list</span>
+                <span class="badge prop">属性 getter</span>
+                <span class="badge ret">Station[]</span>
+            </div>
+            <p class="desc">获取车站全部列表，完整返回所有车站。</p>
+            <div class="code" id="list-code"></div>
+            <div class="result" id="list-result"></div>
+        </div>
+
+        <!-- group -->
+        <div class="card wide">
+            <div class="card-title">
+                <span class="name">group</span>
+                <span class="badge prop">属性 getter</span>
+                <span class="badge ret">Record&lt;string, Station[]&gt;</span>
+            </div>
+            <p class="desc">获取车站全部列表（按城市分组）。选择城市查看该城市下的所有车站。</p>
+            <div class="controls">
+                <select id="group-select"></select>
+            </div>
+            <div class="code" id="group-code"></div>
+            <div class="result" id="group-result"></div>
+        </div>
+    </div>
+
+    <div class="section-head">
+        <h2>方法 Methods</h2>
+        <p>输入参数后点击查询（或按回车），查看实时调用结果。</p>
+    </div>
+
+    <div class="grid">
+        <!-- find -->
+        <div class="card wide">
+            <div class="card-title">
+                <span class="name">find(keyword)</span>
+                <span class="badge method">方法</span>
+                <span class="badge ret">Station[]</span>
+            </div>
+            <p class="desc">模糊搜索车站，匹配站名、拼音、拼音码、首字母、电报码、城市、城市编码等字段。</p>
+            <table class="params">
+                <thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead>
+                <tbody><tr><td><code>keyword</code></td><td>string</td><td>搜索关键词</td></tr></tbody>
+            </table>
+            <div class="controls">
+                <input id="find-input" type="text" placeholder="如：北京 / bj / VNP">
+                <button data-run="find">查询</button>
+            </div>
+            <div class="code" id="find-code"></div>
+            <div class="result" id="find-result"></div>
+        </div>
+
+        <!-- findByName -->
+        <div class="card wide">
+            <div class="card-title">
+                <span class="name">findByName(name)</span>
+                <span class="badge method">方法</span>
+                <span class="badge ret">Station | undefined</span>
+            </div>
+            <p class="desc">通过精确的车站名获取单个车站信息。</p>
+            <table class="params">
+                <thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead>
+                <tbody><tr><td><code>name</code></td><td>string</td><td>车站名（精确匹配）</td></tr></tbody>
+            </table>
+            <div class="controls">
+                <input id="byname-input" type="text" placeholder="如：上海 / 北京西">
+                <button data-run="byname">查询</button>
+            </div>
+            <div class="code" id="byname-code"></div>
+            <div class="result" id="byname-result"></div>
+        </div>
+
+        <!-- findByTelecode -->
+        <div class="card wide">
+            <div class="card-title">
+                <span class="name">findByTelecode(telecode)</span>
+                <span class="badge method">方法</span>
+                <span class="badge ret">Station | undefined</span>
+            </div>
+            <p class="desc">通过电报码获取单个车站信息（大小写不敏感，内部转为大写匹配）。</p>
+            <table class="params">
+                <thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead>
+                <tbody><tr><td><code>telecode</code></td><td>string</td><td>电报码，如 BJP</td></tr></tbody>
+            </table>
+            <div class="controls">
+                <input id="bytele-input" type="text" placeholder="如：VNP / shh">
+                <button data-run="bytele">查询</button>
+            </div>
+            <div class="code" id="bytele-code"></div>
+            <div class="result" id="bytele-result"></div>
+        </div>
+
+        <!-- findByPinyinCode -->
+        <div class="card wide">
+            <div class="card-title">
+                <span class="name">findByPinyinCode(pinyinCode)</span>
+                <span class="badge method">方法</span>
+                <span class="badge ret">Station[]</span>
+            </div>
+            <p class="desc">通过拼音码获取车站信息（大小写不敏感），返回匹配的列表。</p>
+            <table class="params">
+                <thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead>
+                <tbody><tr><td><code>pinyinCode</code></td><td>string</td><td>拼音码，如 bji</td></tr></tbody>
+            </table>
+            <div class="controls">
+                <input id="bypy-input" type="text" placeholder="如：bji / sha">
+                <button data-run="bypy">查询</button>
+            </div>
+            <div class="code" id="bypy-code"></div>
+            <div class="result" id="bypy-result"></div>
+        </div>
+
+        <!-- findByCity -->
+        <div class="card wide">
+            <div class="card-title">
+                <span class="name">findByCity(city)</span>
+                <span class="badge method">方法</span>
+                <span class="badge ret">Station[]</span>
+            </div>
+            <p class="desc">通过城市名或城市编码获取该城市下的所有车站。</p>
+            <table class="params">
+                <thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead>
+                <tbody><tr><td><code>city</code></td><td>string</td><td>城市名 / 城市编码</td></tr></tbody>
+            </table>
+            <div class="controls">
+                <input id="bycity-input" type="text" placeholder="如：北京 / 0357">
+                <button data-run="bycity">查询</button>
+            </div>
+            <div class="code" id="bycity-code"></div>
+            <div class="result" id="bycity-result"></div>
+        </div>
+    </div>
+
+</main>
+
+<script src="../build/index.iife.js"></script>
+<script>
+(function () {
+    "use strict";
+
+    if (typeof ChinaRailwayStation === "undefined") {
+        document.getElementById("err-banner").hidden = false;
+        return;
+    }
+
+    var station = new ChinaRailwayStation();
+    var list = station.list;
+    var group = station.group;
+
+    document.getElementById("app").hidden = false;
+
+    /* ---------- 字段定义（站名优先，覆盖 Station 全部属性） ---------- */
+    var FIELDS = [
+        ["name", "站名"],
+        ["telecode", "电报码"],
+        ["pinyinCode", "拼音码"],
+        ["pinyin", "拼音"],
+        ["pinyinLetter", "首字母"],
+        ["city", "所属城市"],
+        ["sameCityCode", "城市编码"],
+        ["order", "序号"],
+        ["cityEng", "城市英文"],
+        ["country", "所属国家"],
+        ["countryEng", "国家英文"]
+    ];
+
+    /* ---------- 工具函数 ---------- */
+    function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
+    function cell(v) {
+        return (v === undefined || v === "") ? '<span class="na">-</span>' : esc(v);
+    }
+
+    function renderStations(stations, limit) {
+        limit = limit || 200;
+        if (!stations || stations.length === 0) {
+            return '<div class="empty">无匹配结果（返回空数组 []）</div>';
+        }
+        var shown = stations.slice(0, limit);
+        var html = '<div class="table-wrap"><table class="data"><thead><tr>';
+        FIELDS.forEach(function (f) { html += "<th>" + f[1] + "</th>"; });
+        html += "</tr></thead><tbody>";
+        shown.forEach(function (s) {
+            html += "<tr>";
+            FIELDS.forEach(function (f) {
+                var cls = f[0] === "name" ? ' class="name-cell"' : "";
+                html += "<td" + cls + ">" + cell(s[f[0]]) + "</td>";
+            });
+            html += "</tr>";
+        });
+        html += "</tbody></table></div>";
+        if (stations.length > limit) {
+            html += '<div class="more">共 ' + stations.length + " 条，已显示前 " + limit + " 条</div>";
+        }
+        return html;
+    }
+
+    function renderStation(s) {
+        if (!s) {
+            return '<div class="empty">未找到车站（返回 undefined）</div>';
+        }
+        var html = '<dl class="detail">';
+        FIELDS.forEach(function (f) {
+            html += "<div><dt>" + f[1] + " <code>" + f[0] + "</code></dt><dd>" + cell(s[f[0]]) + "</dd></div>";
+        });
+        html += "</dl>";
+        return html;
+    }
+
+    function meta(text) {
+        return '<div class="result-meta">' + text + "</div>";
+    }
+
+    /* 代码高亮回显 */
+    function tok(cls, text) { return '<span class="tok-' + cls + '">' + esc(text) + "</span>"; }
+
+    function echoCall(fn, arg) {
+        return tok("obj", "station") + tok("punc", ".") + tok("fn", fn) +
+            tok("punc", "(") + (arg === undefined ? "" : tok("str", JSON.stringify(arg))) + tok("punc", ")");
+    }
+
+    /* ---------- 统计 ---------- */
+    document.getElementById("stat-stations").textContent = list.length.toLocaleString();
+    document.getElementById("stat-cities").textContent = Object.keys(group).length.toLocaleString();
+    var telecodes = {};
+    list.forEach(function (s) { if (s.telecode) telecodes[s.telecode] = 1; });
+    document.getElementById("stat-telecode").textContent = Object.keys(telecodes).length.toLocaleString();
+
+    /* ---------- 属性：list（分页展示，避免一次性渲染全部 3000+ 行造成卡顿） ---------- */
+    var LIST_PAGE_SIZE = 50;
+    var listCode = document.getElementById("list-code");
+    var listResult = document.getElementById("list-result");
+    var listPage = 1;
+
+    function renderPager(page, totalPages, start, count, total) {
+        if (totalPages <= 1) {
+            return '<div class="pager"><span class="pg-info">共 <b>' + total + '</b> 条</span></div>';
+        }
+        return '<div class="pager">' +
+            '<button class="pg-btn" data-page="1"' + (page <= 1 ? " disabled" : "") + '>首页</button>' +
+            '<button class="pg-btn" data-page="prev"' + (page <= 1 ? " disabled" : "") + '>上一页</button>' +
+            '<span class="pg-info">第 <b>' + page + '</b> / ' + totalPages + ' 页 · ' + (start + 1) + '–' + (start + count) + ' / ' + total + '</span>' +
+            '<button class="pg-btn" data-page="next"' + (page >= totalPages ? " disabled" : "") + '>下一页</button>' +
+            '<button class="pg-btn" data-page="last"' + (page >= totalPages ? " disabled" : "") + '>末页</button>' +
+            '</div>';
+    }
+
+    function renderList() {
+        var total = list.length;
+        var totalPages = Math.ceil(total / LIST_PAGE_SIZE) || 1;
+        if (listPage > totalPages) listPage = totalPages;
+        if (listPage < 1) listPage = 1;
+        var start = (listPage - 1) * LIST_PAGE_SIZE;
+        var pageData = list.slice(start, start + LIST_PAGE_SIZE);
+        listCode.innerHTML = tok("obj", "station") + tok("punc", ".") + tok("fn", "list");
+        listResult.innerHTML =
+            meta("属性 <b>station.list</b> · 共 <b>" + total + "</b> 条") +
+            renderStations(pageData) +
+            renderPager(listPage, totalPages, start, pageData.length, total);
+    }
+
+    listResult.addEventListener("click", function (e) {
+        var btn = e.target.closest ? e.target.closest(".pg-btn") : null;
+        if (!btn || btn.disabled) return;
+        var p = btn.getAttribute("data-page");
+        if (p === "prev") listPage--;
+        else if (p === "next") listPage++;
+        else if (p === "last") listPage = Math.ceil(list.length / LIST_PAGE_SIZE);
+        else listPage = parseInt(p, 10);
+        renderList();
+    });
+
+    /* ---------- 属性：group ---------- */
+    var groupSelect = document.getElementById("group-select");
+    var groupCode = document.getElementById("group-code");
+    var groupResult = document.getElementById("group-result");
+    var cities = Object.keys(group).sort(function (a, b) { return a.localeCompare(b, "zh"); });
+    cities.forEach(function (c) {
+        var opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c + "（" + group[c].length + "）";
+        groupSelect.appendChild(opt);
+    });
+
+    function renderGroup() {
+        var city = groupSelect.value;
+        var arr = group[city] || [];
+        groupCode.innerHTML = tok("obj", "station") + tok("punc", ".") + tok("fn", "group") +
+            tok("punc", "[") + tok("str", JSON.stringify(city)) + tok("punc", "]");
+        groupResult.innerHTML = meta("属性 <b>station.group</b> · 共 <b>" + cities.length + "</b> 个城市 · <b>" + esc(city) + "</b> 下 <b>" + arr.length + "</b> 个车站") + renderStations(arr);
+    }
+    groupSelect.addEventListener("change", renderGroup);
+
+    /* ---------- 方法运行器 ---------- */
+    var runners = {
+        find: {
+            input: "find-input", code: "find-code", result: "find-result", fn: "find",
+            run: function (kw) {
+                var res = station.find(kw);
+                return meta("返回 <b>Station[]</b> · <b>" + res.length + "</b> 条") + renderStations(res);
+            }
+        },
+        byname: {
+            input: "byname-input", code: "byname-code", result: "byname-result", fn: "findByName",
+            run: function (v) {
+                var res = station.findByName(v);
+                return meta("返回 <b>Station | undefined</b>") + renderStation(res);
+            }
+        },
+        bytele: {
+            input: "bytele-input", code: "bytele-code", result: "bytele-result", fn: "findByTelecode",
+            run: function (v) {
+                var res = station.findByTelecode(v);
+                return meta("返回 <b>Station | undefined</b>") + renderStation(res);
+            }
+        },
+        bypy: {
+            input: "bypy-input", code: "bypy-code", result: "bypy-result", fn: "findByPinyinCode",
+            run: function (v) {
+                var res = station.findByPinyinCode(v);
+                return meta("返回 <b>Station[]</b> · <b>" + res.length + "</b> 条") + renderStations(res);
+            }
+        },
+        bycity: {
+            input: "bycity-input", code: "bycity-code", result: "bycity-result", fn: "findByCity",
+            run: function (v) {
+                var res = station.findByCity(v);
+                return meta("返回 <b>Station[]</b> · <b>" + res.length + "</b> 条") + renderStations(res);
+            }
+        }
+    };
+
+    function execute(key) {
+        var r = runners[key];
+        var inputEl = document.getElementById(r.input);
+        var codeEl = document.getElementById(r.code);
+        var resultEl = document.getElementById(r.result);
+        var val = inputEl.value.trim();
+        codeEl.innerHTML = echoCall(r.fn, val);
+        if (val === "") {
+            resultEl.innerHTML = '<div class="empty">请输入参数后查询</div>';
+            return;
+        }
+        resultEl.innerHTML = r.run(val);
+    }
+
+    Object.keys(runners).forEach(function (key) {
+        var r = runners[key];
+        document.querySelector('[data-run="' + key + '"]').addEventListener("click", function () { execute(key); });
+        document.getElementById(r.input).addEventListener("keydown", function (e) {
+            if (e.key === "Enter") execute(key);
+        });
+    });
+
+    /* ---------- 初始化默认示例 ---------- */
+    function setVal(id, v) { document.getElementById(id).value = v; }
+    setVal("find-input", "北京");
+    setVal("byname-input", "上海");
+    setVal("bytele-input", "VNP");
+    setVal("bypy-input", "bji");
+    setVal("bycity-input", "北京");
+
+    renderList();
+    if (groupSelect.options.length) {
+        var idxBeijing = cities.indexOf("北京");
+        groupSelect.selectedIndex = idxBeijing > -1 ? idxBeijing : 0;
+        renderGroup();
+    }
+    execute("find");
+    execute("byname");
+    execute("bytele");
+    execute("bypy");
+    execute("bycity");
+})();
+</script>
+</body>
+</html>
