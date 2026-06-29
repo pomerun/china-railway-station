@@ -6,6 +6,8 @@
 
 > 中国铁路车站信息
 
+[在线示例页面](https://pomerun.github.io/china-railway-station)
+
 ## 支持环境
 - Node.js >= 21
 - Chrome >= 117
