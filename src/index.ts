@@ -27,7 +27,7 @@ export default class ChinaRailwayStation {
                 telecode,
                 pinyin,
                 pinyinLetter,
-                order: +order,
+                // order: +order,
                 sameCityCode,
                 city
             }

@@ -11,7 +11,7 @@ export interface Station {
     /** 拼音首字母 */
     pinyinLetter: string;
     /** 序号 */
-    order: number;
+    // order: number;
     /** 城市编码 */
     sameCityCode: string;
     /** 所属城市 */
